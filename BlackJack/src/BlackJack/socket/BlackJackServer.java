@@ -101,7 +101,7 @@ public class BlackJackServer {
 				} 
 
 				
-				// 요기에 접속 시작 날짜
+				// 요기에 접속 시작 날짜 업데이트 해줘야함!!
 
 				while (true) {
 					bw.newLine();
@@ -109,10 +109,11 @@ public class BlackJackServer {
 					bw.newLine();
 					bw.write("=========================\n");
 					bw.write("1. 블랙잭 게임 시작\n");
-					bw.write("2. 사용자 정보 조회\n");
-					bw.write("3. 전적확인\n");
+					bw.write("2. 플레이어 정보 검색\n");
+					bw.write("3. 플레이어 전적 검색\n");
 					bw.write("4. 사용자 정보 수정\n");
-					bw.write("5. 게임 종료\n");
+					bw.write("5. 랭킹 조회\n");
+					bw.write("6. 게임 종료\n");
 					bw.write("=========================\n");
 					bw.newLine();
 					bw.newLine();
@@ -305,11 +306,16 @@ public class BlackJackServer {
                         user.userInformationUpdate();
                         continue;
 						
-					}else if(choiceNum.equals("5")) { 
+					}else if(choiceNum.equals("5")) {
+						
+						//랭킹조회 메소드 구현
+						
+						continue;
+					} else if(choiceNum.equals("6")) { 
 						
 						bw.write("블랙잭을 종료합니다!\n");
 						bw.flush();
-						// 게임 종료시간 업데이트 !
+						// 게임 종료시간 업데이트해줘야함!
 						
 						break;
 						
