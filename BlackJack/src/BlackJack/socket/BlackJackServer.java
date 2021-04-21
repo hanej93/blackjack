@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +43,25 @@ public class BlackJackServer {
 
 		private Socket socket;
 		private BufferedWriter bw;
+		
+		// 로그인에 접속한 플레이어 아이디
 		private String playerId;
+		
+		
+		// 전적관리에 관한 필드
+		private String gameResult;
+		private long oneGameBet;
+		private int totalHit;
+		private int totalStay;
+		private LocalDateTime endGameTime;
 
+		
+		// 히스토리에 관한 필드
+		private LocalDateTime accessTime;
+		private LocalDateTime exitTime;
+		
+		
+		
 		public ServerToClient(Socket socket) throws UnsupportedEncodingException, IOException {
 			this.socket = socket;
 			this.bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"));
@@ -292,10 +310,12 @@ public class BlackJackServer {
 
 						// 사용자정보 조회
 						user.userInformationSelect();
+						
 						continue;
 
 					} else if (choiceNum.equals("3")) {
 						// 전적 테이블 조회
+						
 
 					} else if (choiceNum.equals("4")) {
 						// 커스터머 테이블 업데이트(본인 것만 가능!)

@@ -18,6 +18,9 @@ public class Users {
 	private String password;
 	private String phoneNumber;
 	private String address;
+	private long money;
+	private String rankf;
+	
 	private BufferedReader br;
 	private BufferedWriter bw;
 
@@ -117,14 +120,12 @@ public class Users {
 		pstm.executeUpdate();
 	}
 
-	// 사용자정보 조회 (미구현 수정 필요!, 테스트 필요 + 랭크, 자산도 조회해야 함!)
+	// 사용자정보 조회(구현 끝?)
 	public void userInformationSelect() throws SQLException, IOException, ClassNotFoundException {
-		String selectSql = "select user_id, phone_number, address from customer_info where user_id = ?";
+		String selectSql = "select user_id, phone_number, address, money, rankf from customer_info where user_id = ?";
 		Connection conn = MyConnect.getConnect();
 		PreparedStatement pstm = conn.prepareStatement(selectSql);
 
-		// 객체에 아이디 저장
-		userId = br.readLine();
 		pstm.setString(1, userId);
 
 		ResultSet rs = pstm.executeQuery();
@@ -142,6 +143,17 @@ public class Users {
 			bw.write("주소 : " + address);
 			bw.newLine();
 			bw.flush();
+			
+			money = rs.getLong("money");
+			bw.write("보유 자산: " + money);
+			bw.newLine();
+			bw.flush();
+			
+			rankf = rs.getString("rankf");
+			bw.write("티어 : " + rankf);
+			bw.newLine();
+			bw.flush();
+			
 		}
 
 	}
