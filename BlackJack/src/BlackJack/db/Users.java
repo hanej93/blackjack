@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class Users {
 	private String address;
 	private long money;
 	private String rankf;
-	
+
 	private BufferedReader br;
 	private BufferedWriter bw;
 
@@ -77,6 +78,27 @@ public class Users {
 	public String toString() {
 		return "Users [customerId=" + customerId + ", userId=" + userId + ", password=" + password + ", phoneNumber="
 				+ phoneNumber + ", address=" + address + "]";
+	}
+
+	// Customer_info 테이블의 모든정보를 조회하는 메소드
+	public void selectAllCustomerInfo(String inputId) throws ClassNotFoundException, SQLException {
+		String selectSql = "select customer_id, user_id, password, phone_number, address, money, rankf from customer_info where user_id = ?";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(selectSql);
+
+		pstm.setString(1, inputId);
+
+		ResultSet rs = pstm.executeQuery();
+		if (rs.next()) {
+			customerId = rs.getInt("customer_id");
+			userId = rs.getString("user_id");
+			password = rs.getString("password");
+			phoneNumber = rs.getString("phone_number");
+			address = rs.getString("address");
+			money = rs.getLong("money");
+			rankf = rs.getString("rankf");
+		}
+
 	}
 
 	// 아이디 중복확인 필요!(일부 기능 미구현) 배팅이랑 기본랭크도 설정!
@@ -143,41 +165,68 @@ public class Users {
 			bw.write("주소 : " + address);
 			bw.newLine();
 			bw.flush();
-			
+
 			money = rs.getLong("money");
 			bw.write("보유 자산: " + money);
 			bw.newLine();
 			bw.flush();
-			
+
 			rankf = rs.getString("rankf");
 			bw.write("티어 : " + rankf);
 			bw.newLine();
 			bw.flush();
-			
+
 		}
 
 	}
 
 	// 사용자 정보 수정 (미구현) - 로그인한 본인만 수정가능!
-	public void userInformationUpdate() throws SQLException, IOException, ClassNotFoundException {
-		String updateSql = "update customer_info set(?) where user_id = ?";
+	public void userInformationUpdate(String inputId) throws SQLException, IOException, ClassNotFoundException {
+		String updateSql = "update customer_info set password = ?, phone_number = ?, address = ? where user_id = ?";
 		Connection conn = MyConnect.getConnect();
 		PreparedStatement pstm = conn.prepareStatement(updateSql);
 
-		// 객체에 아이디 저장
-		userId = br.readLine();
-		pstm.setString(1, userId);
+		this.selectAllCustomerInfo(inputId);
 
-		pstm.executeQuery();
+		// 만들어야 할 것! 출력하는 것을 클라이언트에게 보내주고 클라이언트가 입력받은 것을 서버가 읽어서 필드에 저장!
+		String enterCheck;
 
-		bw.write(userId + "님의 사용자 정보\n");
-		bw.write("아이디 : " + userId);
-		bw.write("\n휴대폰번호 : " + phoneNumber);
-		bw.write("\n주소 : " + address);
+		bw.write("비밀번호를 수정하시겠습니까? 엔터시 수정 안함\n");
 		bw.flush();
+		enterCheck = br.readLine();
+		if (!enterCheck.equals("")) {
+			bw.write("수정할 비밀번호를 입력하세요 : \n");
+			bw.flush();
+			password = br.readLine();
+		}
+
+		bw.write("전화번호를 수정하시겠습니까? 엔터시 수정 안함\n");
+		bw.flush();
+		enterCheck = br.readLine();
+		if (!enterCheck.equals("")) {
+			bw.write("수정할 전화번호를 입력하세요 : \n");
+			bw.flush();
+			phoneNumber = br.readLine();
+		}
+
+		bw.write("주소를 수정하시겠습니까? 엔터시 수정 안함\n");
+		bw.flush();
+		enterCheck = br.readLine();
+		if (!enterCheck.equals("")) {
+			bw.write("수정할 주소를 입력하세요 : \n");
+			bw.flush();
+			address = br.readLine();
+		}
+
+		pstm.setString(1, password);
+		pstm.setString(2, phoneNumber);
+		pstm.setString(3, address);
+		pstm.setString(4, inputId);
+
+		pstm.executeUpdate();
+
 	}
 
-	
 	// 플레이어 보유한 자산 반환하는 메소드
 	public long playerMoney(String playerId) throws ClassNotFoundException, SQLException, IOException {
 		String selectSql = "select money from customer_info where user_id = ?";
@@ -191,14 +240,13 @@ public class Users {
 		if (rs.next()) {
 			return rs.getLong("money");
 		}
-		
+
 		return -1;
 	}
-	
-	
-	// 베팅 
+
+	// 베팅
 	public void updateMoney(long money) throws SQLException, IOException, ClassNotFoundException {
-		String updateSql = "update customer_info set money += ? where user_id = ?";
+		String updateSql = "update customer_info set money = money + ? where user_id = ?";
 		Connection conn = MyConnect.getConnect();
 		PreparedStatement pstm = conn.prepareStatement(updateSql);
 
@@ -206,10 +254,39 @@ public class Users {
 		pstm.setLong(1, money);
 		pstm.setString(2, userId);
 
-		pstm.executeQuery();
+		pstm.executeUpdate();
 
 	}
 
+	// 전적 테이블 조회해서 Record 반환 메소드
+	public void RecordTableLookUp(String inputUserId) throws ClassNotFoundException, SQLException, IOException {
+		String selectSql = "select * from record_table where user_id = ?";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(selectSql);
 
+		// 객체에 아이디 저장
+		pstm.setString(1, inputUserId);
+
+		ResultSet rs = pstm.executeQuery();
+		while (rs.next()) {
+			int recordId = rs.getInt("record_id");
+			int customerId = rs.getInt("customer_id");
+			String gameResult = rs.getString("game_result");
+			long bet = rs.getLong("bet");
+			int totalHit = rs.getInt("total_hit");
+			int totalStay = rs.getInt("total_stay");
+			LocalDateTime endGameTime = rs.getTimestamp("end_game_time").toLocalDateTime();
+			LocalDateTime accessTime = rs.getTimestamp("access_game_time").toLocalDateTime();
+			LocalDateTime exitTime = rs.getTimestamp("exit_game_time").toLocalDateTime();
+
+			String result = "[전적 테이블 조회]\n" + "[" + recordId + "]" + "고객 아이디 : " + customerId + ", " + "게임 결과 : "
+					+ gameResult + ", " + "게임 내 배팅 금액 : " + bet + ", " + "게임 내 hit한 수 : " + totalHit + ", "
+					+ "게임 내 stay한 수 : " + totalStay + ", " + "게임 끝난 시간 : " + endGameTime + ", " + "접속 시간 : "
+					+ accessTime + ", " + "접속 종료 시간 : " + exitTime;
+
+			bw.write(result + "\n");
+			bw.flush();
+		}
+	}
 
 }

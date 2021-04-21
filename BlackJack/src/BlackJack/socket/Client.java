@@ -10,7 +10,7 @@ public class Client {
 			//write 스레드
 			Thread wt = new Thread((new WriteThread(socket)));
 			wt.start();
-			//reade 스레드
+			//read 스레드
 			Thread rt = new Thread((new ReadThread(socket)));
 			rt.start();
 			

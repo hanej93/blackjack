@@ -43,9 +43,10 @@ public class BlackJackServer {
 
 		private Socket socket;
 		private BufferedWriter bw;
-		
+
 		// 로그인에 접속한 플레이어 아이디
 		private String playerId;
+		private long bettingMoney;
 		
 		
 		// 전적관리에 관한 필드
@@ -55,13 +56,10 @@ public class BlackJackServer {
 		private int totalStay;
 		private LocalDateTime endGameTime;
 
-		
 		// 히스토리에 관한 필드
 		private LocalDateTime accessTime;
 		private LocalDateTime exitTime;
-		
-		
-		
+
 		public ServerToClient(Socket socket) throws UnsupportedEncodingException, IOException {
 			this.socket = socket;
 			this.bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"));
@@ -93,58 +91,56 @@ public class BlackJackServer {
 
 					if (loginChoice.equals("1")) {
 
-		                  Users user = new Users(br, bw);
-		                  UsersImpl usersImpl = new UsersImpl(br,bw);
+						Users user = new Users(br, bw);
+						UsersImpl usersImpl = new UsersImpl(br, bw);
 
-		                  while (true) {
-		                     bw.write("아이디를 입력하세요 : \n");
-		                     bw.flush();
-		                     this.playerId = br.readLine();
+						while (true) {
+							bw.write("아이디를 입력하세요 : \n");
+							bw.flush();
+							this.playerId = br.readLine();
 
-		                     // DB에서 아이디, 비밀번호 일치필요!!
-		                     bw.write("비밀번호를 입력하세요 : \n");
-		                     bw.flush();
-		                     String password = br.readLine();
+							// DB에서 아이디, 비밀번호 일치필요!!
+							bw.write("비밀번호를 입력하세요 : \n");
+							bw.flush();
+							String password = br.readLine();
 
-		                     user.setUserId(playerId);
-		                     user.setPassword(password);
-		                     String functionResult = usersImpl.selectWithId(user);
-		                     
-		                     String returnTorF = null;
-		                     
-		                     if(functionResult == null) {
-		                        continue;
-		                     }
-		                     if(!(password.equals(""))) { //UsersImpl login null체크 사용 안할 시 이 주석 풀기
-		                        returnTorF = usersImpl.login(user);//아이디, 패스워드 일치 검사
-		                        
-		                        if(returnTorF.equals("false")) {//return값이 false면 재 로그인
-		                           continue;
-		                        }
-		                        break;
-		                     }else {
-		                        bw.write("비밀번호를 입력하지 않았습니다. 다시 입력해주세요.\n");
-		                        bw.flush();
-		                        continue;
-		                     }
-		                     
-		                     // 실패 시 continue
-		                     // 로그인 성공처리 후 반복문 break
-		                  }
-		                  break;
-		               } else if (loginChoice.equals("2")) {
-		                  Users user = new Users(br, bw);
-		                  user.userSignup();
-		                  continue;
+							user.setUserId(playerId);
+							user.setPassword(password);
+							String functionResult = usersImpl.selectWithId(user);
 
-		               } else {
-		                  bw.write("데이터를 잘못 입력했습니다 다시 입력해주세요\n\n");
-		               }
+							String returnTorF = null;
+
+							if (functionResult == null) {
+								continue;
+							}
+							if (!(password.equals(""))) { // UsersImpl login null체크 사용 안할 시 이 주석 풀기
+								returnTorF = usersImpl.login(user);// 아이디, 패스워드 일치 검사
+
+								if (returnTorF.equals("false")) {// return값이 false면 재 로그인
+									continue;
+								}
+								break;
+							} else {
+								bw.write("비밀번호를 입력하지 않았습니다. 다시 입력해주세요.\n");
+								bw.flush();
+								continue;
+							}
+
+						}
+						break;
+					} else if (loginChoice.equals("2")) {
+						Users user = new Users(br, bw);
+						user.userSignup();
+						continue;
+
+					} else {
+						bw.write("데이터를 잘못 입력했습니다 다시 입력해주세요\n\n");
+					}
 
 				}
 
-				// 요기에 접속 시작 날짜 업데이트 해줘야함!! ㅎ
-				
+				// 요기에 접속 시작 날짜 업데이트 해줘야함!!
+
 				while (true) {
 					bw.newLine();
 					bw.newLine();
@@ -189,19 +185,31 @@ public class BlackJackServer {
 						Dealer dealer = new Dealer(br, bw, cardDeck, dealerHand);
 						Player player = new Player(br, bw, cardDeck, playerHand);
 
-						// 자산 조회기능 미구현!!!!!
-						// int userAsset = user.userAsset();
-						// bw.write("보유한 자산: " + userAsset);
-						// bw.newLine();
-						// bw.flush();
+						
+						
+						
+						Users moneyCheck = new Users(br,bw);
+						moneyCheck.setUserId(playerId);
+						long userAsset = moneyCheck.playerMoney(playerId);
+						bw.write("보유한 자산: " + userAsset);
+						bw.newLine();
+						bw.flush();
 
-						/*
-						 * while(true) { bw.write("배팅할 금액을 입력해주세요!\n"); bw.flush(); int bettingMoney =
-						 * Integer.parseInt(br.readLine()); if(bettingMoney > userAsset) {
-						 * bw.write("보유한 자산보다 배팅금액이 많습니다.\n"); bw.write("다시 입력바랍니다.\n"); bw.flush(); }
-						 * Users user = new Users(br, bw); user.updateBet(); }
-						 */
+						while (true) {
+							bw.write("배팅할 금액을 입력해주세요!\n");
+							bw.flush();
+							bettingMoney = Long.parseLong(br.readLine());
+							if (bettingMoney > userAsset) {
+								bw.write("보유한 자산보다 배팅금액이 많습니다.\n");
+								bw.write("다시 입력바랍니다.\n");
+								bw.flush();
+								continue;
+							}
+							moneyCheck.updateMoney(-bettingMoney);
+							break;
+						}
 
+						
 						bw.write("------ 딜러의 카드 ------\n");
 						dealerHand = dealer.drawCard();
 						dealerHand = dealer.drawCard();
@@ -283,15 +291,41 @@ public class BlackJackServer {
 						if (!player.isBust() && player.sumHand() > dealer.sumHand()) {
 							bw.write("플레이어 승리");
 							// 배팅금액 만큼 플페이어 자산 업데이트(증가)
+							moneyCheck.updateMoney(bettingMoney*2);
+							bw.write(Long.toString(moneyCheck.playerMoney(playerId)));
+							bw.newLine();
+							bw.flush();
 							// 전적테이블 업데이트(플레이종료시간, 승패)
-
+							
 						} else if (!player.isBust() && dealer.isBust()) {
 							bw.write("플레이어 승리");
+							// 배팅금액 만큼 플페이어 자산 업데이트(증가)
+							moneyCheck.updateMoney(bettingMoney*2);
+							bw.write("플레이어 보유 자산: " + Long.toString(moneyCheck.playerMoney(playerId)));
+							bw.newLine();
+							bw.flush();
+							// 전적테이블 업데이트(플레이종료시간, 승패)
+							
 						} else if (!player.isBust() && player.sumHand() == dealer.sumHand()) {
 							bw.write("무승부");
-						} else {
+							moneyCheck.updateMoney(bettingMoney);
+							bw.write("플레이어 보유 자산: " + Long.toString(moneyCheck.playerMoney(playerId)));
+							bw.newLine();
+							bw.flush();
+							
+						} else if(player.isBust() && dealer.isBust()) {
+							bw.write("무승부");
+							moneyCheck.updateMoney(bettingMoney);
+							bw.write("플레이어 보유 자산: " + Long.toString(moneyCheck.playerMoney(playerId)));
+							bw.newLine();
+							bw.flush();
+						}
+						else {
 							bw.write("딜러 승리");
-							// 배팅금액 만큼 플레이어 자산 업데이트(차감)
+							bw.write("플레이어 보유 자산 : " + Long.toString(moneyCheck.playerMoney(playerId)));
+							bw.newLine();
+							bw.flush();
+							
 						}
 						bw.flush();
 
@@ -310,22 +344,27 @@ public class BlackJackServer {
 
 						// 사용자정보 조회
 						user.userInformationSelect();
-						
+
 						continue;
 
 					} else if (choiceNum.equals("3")) {
 						// 전적 테이블 조회
-						
 
+						// 전적 테이블 조회
+                        Users user = new Users(br, bw);
+                        
+                        bw.write("전적을 조회할 아이디를 입력해주세요.\n");
+                        bw.flush();
+                        String str = br.readLine();
+                        user.RecordTableLookUp(str);
+
+                        continue;
+                        
 					} else if (choiceNum.equals("4")) {
 						// 커스터머 테이블 업데이트(본인 것만 가능!)
 						Users user = new Users(br, bw);
-						bw.write("아이디를 입력하세요\n");
-						bw.flush();
-						user.setUserId(br.readLine());
-
 						// 사용자정보 수정
-						user.userInformationUpdate();
+						user.userInformationUpdate(playerId);
 						continue;
 
 					} else if (choiceNum.equals("5")) {
