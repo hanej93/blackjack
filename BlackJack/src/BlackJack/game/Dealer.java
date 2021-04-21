@@ -7,7 +7,6 @@ import java.util.List;
 
 public class Dealer {
 	private List<Card> dealerHand;
-	private int bettingMoney;
 	private BufferedReader br;
 	private BufferedWriter bw;
 	private CardDeck cardDeck;

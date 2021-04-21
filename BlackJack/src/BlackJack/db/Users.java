@@ -81,6 +81,7 @@ public class Users {
 				+ phoneNumber + ", address=" + address + "]";
 	}
 
+	// [의진]
 	// Customer_info 테이블의 모든정보를 조회하는 메소드
 	public void selectAllCustomerInfo(String inputId) throws ClassNotFoundException, SQLException {
 		String selectSql = "select customer_id, user_id, password, phone_number, address, money, rankf from customer_info where user_id = ?";
@@ -102,48 +103,77 @@ public class Users {
 
 	}
 
-	// 아이디 중복확인 필요!(일부 기능 미구현) 배팅이랑 기본랭크도 설정!
+	// [의진, 승연]
+	// 회원가입
 	public void userSignup() throws SQLException, IOException, ClassNotFoundException {
-		String insertSql = "insert into customer_info(user_id, password, phone_number, address) values(?,?,?,?)";
-		Connection conn = MyConnect.getConnect();
-		PreparedStatement pstm = conn.prepareStatement(insertSql);
+        List<String> userIdList = new ArrayList<String>();
+        String selectSql = "select user_id from customer_info";
+        String insertSql = "insert into customer_info(user_id, password, phone_number, address) values(?,?,?,?)";
+        Connection conn = MyConnect.getConnect();
+        PreparedStatement pstm = conn.prepareStatement(insertSql);
+        PreparedStatement pstmSelect = conn.prepareStatement(selectSql);
 
-		bw.write("회원가입을 위해 정보를 입력해 주세요\n");
-		bw.newLine();
-		bw.newLine();
+        bw.write("회원가입을 위해 정보를 입력해 주세요\n");
+        bw.newLine();
+        bw.newLine();
 
-		bw.write("아이디를 입력하세요 : \n");
-		bw.flush();
-		// 객체에 아이디 저장
-		userId = br.readLine();
-		pstm.setString(1, userId);
+        
+        // 아이디 중복확인 기능
+        
+        // 셀렉트로 아이디 부분만 가져온 후 리스트로 저장
+        ResultSet rs = pstmSelect.executeQuery();
+        while (rs.next()) {
+            userIdList.add(rs.getString("user_id"));
+        }
+        String compareId = null;
+        
+        // 리스트에 아이디가 있는지 확인 없으면 입력가능
+        loop:
+        while (true) {
+            bw.write("아이디를 입력하세요 : \n");
+            bw.flush();
+            compareId = br.readLine();
+            // 객체에 아이디 저장
+            for (int i = 0; i < userIdList.size(); i++) {
+                if (compareId.equals(userIdList.get(i))) {
+                    bw.write("중복된 아이디입니다. 다시 입력 바랍니다\n");
+                    bw.flush();
+                    continue loop;
+                }
+            }
+            break;
+        }
 
-		bw.write("비밀번호를 입력하세요 : \n");
-		bw.flush();
-		// 객체에 비밀번호 저장
-		password = br.readLine();
-		pstm.setString(2, password);
+        pstm.setString(1, compareId);
+        bw.write("비밀번호를 입력하세요 : \n");
+        bw.flush();
+        // 객체에 비밀번호 저장
+        password = br.readLine();
+        pstm.setString(2, password);
 
-		bw.write("휴대폰번호를 입력하세요 : \n");
-		bw.flush();
-		// 객체에 휴대폰번호 저장
-		phoneNumber = br.readLine();
-		pstm.setString(3, phoneNumber);
+        bw.write("휴대폰번호를 입력하세요 : \n");
+        bw.flush();
+        // 객체에 휴대폰번호 저장
+        phoneNumber = br.readLine();
+        pstm.setString(3, phoneNumber);
 
-		bw.write("주소를 입력하세요 : \n");
-		bw.flush();
-		// 객체에 비밀번호 저장
-		address = br.readLine();
-		pstm.setString(4, address);
+        bw.write("주소를 입력하세요 : \n");
+        bw.flush();
+        // 객체에 비밀번호 저장
+        address = br.readLine();
+        pstm.setString(4, address);
 
-		bw.write("회원가입 성공!!!\n");
-		bw.newLine();
-		bw.newLine();
-		bw.flush();
-		pstm.executeUpdate();
-	}
+        bw.write("회원가입 성공!!!\n");
+        bw.newLine();
+        bw.newLine();
+        bw.flush();
+        pstm.executeUpdate();
 
-	// 사용자정보 조회(구현 끝?)
+    }
+
+	
+	// [의진, 승연]
+	// 사용자정보 조회(아이디, 폰번호, 주소, 자산, 티어)
 	public void userInformationSelect() throws SQLException, IOException, ClassNotFoundException {
 		String selectSql = "select user_id, phone_number, address, money, rankf from customer_info where user_id = ?";
 		Connection conn = MyConnect.getConnect();
@@ -181,7 +211,9 @@ public class Users {
 
 	}
 
-	// 사용자 정보 수정 (미구현) - 로그인한 본인만 수정가능!
+	
+	// [의진, 승연]
+	// 사용자 정보 수정
 	public void userInformationUpdate(String inputId) throws SQLException, IOException, ClassNotFoundException {
 		String updateSql = "update customer_info set password = ?, phone_number = ?, address = ? where user_id = ?";
 		Connection conn = MyConnect.getConnect();
@@ -228,6 +260,8 @@ public class Users {
 
 	}
 
+	
+	// [의진]
 	// 플레이어 보유한 자산 반환하는 메소드
 	public long playerMoney(String playerId) throws ClassNotFoundException, SQLException, IOException {
 		String selectSql = "select money from customer_info where user_id = ?";
@@ -245,7 +279,8 @@ public class Users {
 		return -1;
 	}
 
-	// 베팅
+	// [의진]
+	// customer_info 테이블의 특정 유저의 money를 더해주는 메소드
 	public void updateMoney(long money) throws SQLException, IOException, ClassNotFoundException {
 		String updateSql = "update customer_info set money = money + ? where user_id = ?";
 		Connection conn = MyConnect.getConnect();
@@ -259,6 +294,8 @@ public class Users {
 
 	}
 
+	
+	// [명주]
 	// 전적 테이블 조회해서 Record 반환 메소드
 	public void RecordTableLookUp(String inputUserId) throws ClassNotFoundException, SQLException, IOException {
 		String selectSql = "select * from record_table where user_id = ?";
@@ -289,27 +326,31 @@ public class Users {
 		}
 	}
 
+	// [명주]
 	// 랭킹 조회
-	public void selectRank(String inputUserId) throws ClassNotFoundException, SQLException, IOException {
-		String rankSelectSql = "select user_id, money, rankf from customer_info where user_id = ? order by money desc limit 10";
-		Connection conn = MyConnect.getConnect();
-		PreparedStatement pstm = conn.prepareStatement(rankSelectSql);
+	public void selectRank() throws ClassNotFoundException, SQLException, IOException {
+        String rankSelectSql = "select user_id, money, rankf from customer_info order by money desc limit 10";
+        Connection conn = MyConnect.getConnect();
+        PreparedStatement pstm = conn.prepareStatement(rankSelectSql);
 
-		pstm.setString(1, inputUserId);
 
-		ResultSet rs = pstm.executeQuery();
-		while (rs.next()) {
-			userId = rs.getString("user_id");
-			money = rs.getLong("money");
-			rankf = rs.getString("rankf");
-			String result = "[랭크 테이블 조회]\n" + "아이디 : " + "[" + userId + "]\n" + "보유 자산 : " + "[" + money + "]\n"
-					+ "랭크 : " + "[" + rankf + "]";
+        ResultSet rs = pstm.executeQuery();
+        while (rs.next()) {
+            userId = rs.getString("user_id");
+            money = rs.getLong("money");
+            rankf = rs.getString("rankf");
+            String result = "[랭크 테이블 조회]\n" + "아이디 : " + "[" + userId + "]\n" + "보유 자산 : " + "[" + money + "]\n"
+                    + "랭크 : " + "[" + rankf + "]";
 
-			bw.write(result + "\n");
-			bw.flush();
-		}
-	}
+            bw.write(result + "\n");
+            bw.flush();
+        }
 
+    }
+
+	
+	// [명주]
+	// 종료시 접속기록을 인설트
 	public void accessTimeSet(String userId, LocalDateTime accessTime, LocalDateTime exitTime)
 			throws ClassNotFoundException, SQLException, IOException {
 		String sql = "insert into history_table(user_id, access_date, exit_date)values(?, ?, ?)";

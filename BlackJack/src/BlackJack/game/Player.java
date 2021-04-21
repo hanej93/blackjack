@@ -8,7 +8,6 @@ import java.util.List;
 public class Player {
 
 	private List<Card> playerHand;
-	private int bettingMoney;
 	private BufferedReader br;
 	private BufferedWriter bw;
 	private CardDeck cardDeck;
