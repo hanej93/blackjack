@@ -75,53 +75,58 @@ public class BlackJackServer {
 
 					if (loginChoice.equals("1")) {
 
-						Users user = new Users(br, bw);
-						UsersImpl usersImpl = new UsersImpl(br,bw);
+		                  Users user = new Users(br, bw);
+		                  UsersImpl usersImpl = new UsersImpl(br,bw);
 
-						while (true) {
-							bw.write("아이디를 입력하세요 : \n");
-							bw.flush();
-							this.playerId = br.readLine();
+		                  while (true) {
+		                     bw.write("아이디를 입력하세요 : \n");
+		                     bw.flush();
+		                     this.playerId = br.readLine();
 
-							// DB에서 아이디, 비밀번호 일치필요!!
-							bw.write("비밀번호를 입력하세요 : \n");
-							bw.flush();
-							String password = br.readLine();
+		                     // DB에서 아이디, 비밀번호 일치필요!!
+		                     bw.write("비밀번호를 입력하세요 : \n");
+		                     bw.flush();
+		                     String password = br.readLine();
 
-							user.setUserId(playerId);
-							user.setPassword(password);
-							String functionResult = usersImpl.selectWithId(user);
-							
-							if(functionResult == null) {
-								continue;
-							}
-							if(!(password.equals(""))) { //UsersImpl login null체크 사용 안할 시 이 주석 풀기
-								usersImpl.login(user);//아이디, 패스워드 일치 검사
-								break;
-							}else {
-								bw.write("비밀번호를 입력하지 않았습니다. 다시 입력해주세요.\n");
-								bw.flush();
-								continue;
-							}
-							
-							// 실패 시 continue
-							// 로그인 성공처리 후 반복문 break
-						}
-						break;
+		                     user.setUserId(playerId);
+		                     user.setPassword(password);
+		                     String functionResult = usersImpl.selectWithId(user);
+		                     
+		                     String returnTorF = null;
+		                     
+		                     if(functionResult == null) {
+		                        continue;
+		                     }
+		                     if(!(password.equals(""))) { //UsersImpl login null체크 사용 안할 시 이 주석 풀기
+		                        returnTorF = usersImpl.login(user);//아이디, 패스워드 일치 검사
+		                        
+		                        if(returnTorF.equals("false")) {//return값이 false면 재 로그인
+		                           continue;
+		                        }
+		                        break;
+		                     }else {
+		                        bw.write("비밀번호를 입력하지 않았습니다. 다시 입력해주세요.\n");
+		                        bw.flush();
+		                        continue;
+		                     }
+		                     
+		                     // 실패 시 continue
+		                     // 로그인 성공처리 후 반복문 break
+		                  }
+		                  break;
+		               } else if (loginChoice.equals("2")) {
+		                  Users user = new Users(br, bw);
+		                  user.userSignup();
+		                  continue;
 
-					} else if (loginChoice.equals("2")) {
-						Users user = new Users(br, bw);
-						user.userSignup();
-						continue;
-
-					} else {
-						bw.write("데이터를 잘못 입력했습니다 다시 입력해주세요\n\n");
-					}
+		               } else {
+		                  bw.write("데이터를 잘못 입력했습니다 다시 입력해주세요\n\n");
+		               }
 
 				}
 
-				// 요기에 접속 시작 날짜 업데이트 해줘야함!!
-
+				// 요기에 접속 시작 날짜 업데이트 해줘야함!! ㅎ
+				
 				while (true) {
 					bw.newLine();
 					bw.newLine();

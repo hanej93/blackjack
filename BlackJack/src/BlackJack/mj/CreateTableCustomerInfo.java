@@ -63,6 +63,10 @@ public class CreateTableCustomerInfo {
 				+" foreign key (customer_id) references customer_info (customer_id) "
 				+ ")";
 
+		// customer_info 테이블의 컬럼 두개 추가하였으며, money와 랭크관련 테이블 전부 삭제했습니다.
+//		alter table customer_info add money bigint default 100000000 COMMENT '기본 자산 1억'; 
+//		alter table customer_info add rankf varchar(45) not null default '아이언' COMMENT '실제 표기되는 rank';
+		
 //		record_table 쿼리문
 //		create table record_table(
 //		record_id int primary key not null auto_increment COMMENT '레코드 아이디', 

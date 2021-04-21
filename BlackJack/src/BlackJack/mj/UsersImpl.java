@@ -67,42 +67,41 @@ public class UsersImpl {
 	}
 
 	public String login(Users user) throws IOException {
-		String sql = "select * from customer_info where user_id = ?";
+	      String sql = "select * from customer_info where user_id = ?";
 
-		try (Connection conn = MyConnect.getConnect(); PreparedStatement pstm = conn.prepareStatement(sql)) {
+	      try (Connection conn = MyConnect.getConnect(); PreparedStatement pstm = conn.prepareStatement(sql)) {
 
-			pstm.setString(1, user.getUserId());
-			ResultSet rs = pstm.executeQuery();
-			while (rs.next()) {
-				if (user.getPassword().equals(rs.getString("password"))) {
-					bw.write("로그인에 성공했습니다.\n");
-					bw.flush();
-				} else {
-					bw.write("로그인에 실패했습니다.");
-					bw.newLine();
-					bw.write("아이디 정보가 없습니다. 회원가입하시겠습니까? y/n\n");
-					bw.flush();
-					
-					String isYesLogin = br.readLine();
-					if (isYesLogin.equals("y")) {
-						bw.write("회원가입을 실행합니다.\n");
-						bw.flush();
-						Users signupUser = new Users(br, bw);
-						signupUser.userSignup();
-
-					} else {
-						bw.write("BlackJack을 종료합니다.\n");
-						bw.flush();
-					}
-				}
-			}
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return "true";
-	}
+	         pstm.setString(1, user.getUserId());
+	         ResultSet rs = pstm.executeQuery();
+	         while (rs.next()) {
+	            if (user.getPassword().equals(rs.getString("password"))) {
+	               bw.write("로그인에 성공했습니다.\n");
+	               bw.flush();
+	            } else {
+	               bw.write("로그인에 실패했습니다.");
+	               bw.newLine();
+	               bw.write("아이디와 패스워드가 일치하지 않습니다. 회원가입 = y, 재로그인 = n\n");
+	               bw.flush();
+	               
+	               String isYesLogin = br.readLine();
+	               if (isYesLogin.equals("y")) {
+	                  bw.write("회원가입을 실행합니다.\n");
+	                  bw.flush();
+	                  Users signupUser = new Users(br, bw);
+	                  signupUser.userSignup();
+	                  return "false";
+	               } else {
+	                  return "false";
+	               }
+	            }
+	         }
+	      } catch (ClassNotFoundException e) {
+	         e.printStackTrace();
+	      } catch (SQLException e) {
+	         e.printStackTrace();
+	      }
+	      return "true";
+	   }
 
 	public List<Users> selectList() {
 		// TODO Auto-generated method stub

@@ -17,42 +17,40 @@ import java.util.Scanner;
 
 import dbconnect.MyConnect;
 
-
-public class UsersImpl{
+public class UsersImpl {
 	private static UsersImpl instance = new UsersImpl();
 	private BufferedReader br;
 	private BufferedWriter bw;
-	
+
 	public UsersImpl() {
-		
+
 	}
-	
+
 	public static UsersImpl getInstance() {
 		return instance;
 	}
-	
+
 	public void brbwSet(Users user, BufferedReader br, BufferedWriter bw) {
 		this.br = br;
 		this.bw = bw;
 	}
 
-	public Users selectWithId(Users user)  {//id로 정보조회
+	public Users selectWithId(Users user) {// id로 정보조회
 		String sql = "select * from customer_info where user_id = ?";
-		Users u = new Users(br,bw);
-		
-		try(Connection conn = MyConnect.getConnect();
-				PreparedStatement pstm = conn.prepareStatement(sql)){
-			
+		Users u = new Users(br, bw);
+
+		try (Connection conn = MyConnect.getConnect(); PreparedStatement pstm = conn.prepareStatement(sql)) {
+
 			pstm.setString(1, user.getUserId());
 			ResultSet rs = pstm.executeQuery();
-			
-			if(rs.next()) {
+
+			if (rs.next()) {
 				u.setCustomerId(rs.getInt("customer_id"));
 				u.setUserId(rs.getString("user_id"));
 				u.setPassword(rs.getString("password"));
 				u.setPhoneNumber(rs.getString("phone_number"));
 				u.setAddress(rs.getString("address"));
-			}else {
+			} else {
 				bw.write("해당되는 아이디를 조회할 수 없습니다. 다시 입력해주세요.");
 				bw.flush();
 				return null;
@@ -66,37 +64,33 @@ public class UsersImpl{
 		}
 		return u;
 	}
-	
-	public void login(Users user) {
-		Scanner sc = new Scanner(System.in);
+
+	public String login(Users user) throws IOException {
 		String sql = "select * from customer_info where user_id = ?";
-		
-		try(Connection conn = MyConnect.getConnect();
-				PreparedStatement pstm = conn.prepareStatement(sql)){
-			
+
+		try (Connection conn = MyConnect.getConnect(); PreparedStatement pstm = conn.prepareStatement(sql)) {
+
 			pstm.setString(1, user.getUserId());
 			ResultSet rs = pstm.executeQuery();
-			while(rs.next()) {
-//				LoginTest로 체크 불가능할 시 이쪽 활성화되야함.. 정말 비추
-//				if (user.getPassword() == null || user.getPassword().length() == 0) {//null 체크
-//				    // 값이 없는 경우 처리(순서 맨 위여야 함.)
-//					System.out.println("비밀번호를 입력하지 않았습니다. 다시 입력해주세요.");
-//					return false;
-//				}else 
-				if(user.getPassword().equals(rs.getString("password"))) {
-					bw.write("로그인에 성공했습니다.");
+			while (rs.next()) {
+				if (user.getPassword().equals(rs.getString("password"))) {
+					bw.write("로그인에 성공했습니다.\n");
 					bw.flush();
-				}
-				else {
+				} else {
 					bw.write("로그인에 실패했습니다.");
-					bw.write("아이디 정보가 없습니다. 회원가입하시겠습니까? y/n");
+					bw.newLine();
+					bw.write("아이디와 패스워드가 일치하지 않습니다. 회원가입 = y, 재로그인 = n\n");
 					bw.flush();
-					if((sc.nextLine()).equals("y")) {
-						bw.write("회원가입을 실행합니다.");
+
+					String isYesLogin = br.readLine();
+					if (isYesLogin.equals("y")) {
+						bw.write("회원가입을 실행합니다.\n");
 						bw.flush();
-					}else {
-						bw.write("BlackJack을 종료합니다.");
-						bw.flush();
+						Users signupUser = new Users(br, bw);
+						signupUser.userSignup();
+						return "false";
+					} else {
+						return "false";
 					}
 				}
 			}
@@ -104,9 +98,8 @@ public class UsersImpl{
 			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		return "true";
 	}
 
 	public List<Users> selectList() {
@@ -121,21 +114,20 @@ public class UsersImpl{
 
 	public int insert(Users user) {
 		int result = 0;
-		
+
 		String sql = "insert into customer_info(customer_id, user_id, password, phone_number, address) "
 				+ "values(?, ?, ?, ?, ?)";
-		
-		try(Connection conn = MyConnect.getConnect();
-				PreparedStatement pstm = conn.prepareStatement(sql)){
-			
+
+		try (Connection conn = MyConnect.getConnect(); PreparedStatement pstm = conn.prepareStatement(sql)) {
+
 			pstm.setInt(1, user.getCustomerId());
 			pstm.setString(2, user.getUserId());
 			pstm.setString(3, user.getPassword());
 			pstm.setString(4, user.getPhoneNumber());
 			pstm.setString(5, user.getAddress());
-			
+
 			result = pstm.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e1) {
@@ -156,7 +148,7 @@ public class UsersImpl{
 
 	public void selectTotalCount() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -22,9 +22,9 @@ public class Users {
 	private BufferedWriter bw;
 
 	public Users() {
-		
+
 	}
-	
+
 	public Users(BufferedReader br, BufferedWriter bw) {
 		this.br = br;
 		this.bw = bw;
@@ -76,9 +76,7 @@ public class Users {
 				+ phoneNumber + ", address=" + address + "]";
 	}
 
-	
-	
-	// 아이디 중복확인 필요!(일부 기능 미구현)
+	// 아이디 중복확인 필요!(일부 기능 미구현) 배팅이랑 기본랭크도 설정!
 	public void userSignup() throws SQLException, IOException, ClassNotFoundException {
 		String insertSql = "insert into customer_info(user_id, password, phone_number, address) values(?,?,?,?)";
 		Connection conn = MyConnect.getConnect();
@@ -87,7 +85,7 @@ public class Users {
 		bw.write("회원가입을 위해 정보를 입력해 주세요\n");
 		bw.newLine();
 		bw.newLine();
-		
+
 		bw.write("아이디를 입력하세요 : \n");
 		bw.flush();
 		// 객체에 아이디 저장
@@ -168,44 +166,38 @@ public class Users {
 	}
 
 	
-	
-	/*
-	// 버그 수정 필요, 테스트 검증 필요(미구현)
-	public void userRecord() throws SQLException, IOException, ClassNotFoundException {
-		UsersImpl u1 = new UsersImpl();
-		Record r = new Record();
-		List<Record> recordList = new ArrayList<Record>();
-		u.setGameId(userId);
-		u.setPassword(password);// 현재 가져올 수 있는 데이터까지
-		Users user = u1.selectWithId(u);// select로 데이터 가져옴
+	// 플레이어 보유한 자산 반환하는 메소드
+	public long playerMoney(String playerId) throws ClassNotFoundException, SQLException, IOException {
+		String selectSql = "select money from customer_info where user_id = ?";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(selectSql);
 
-		String sql = "select * from record_table where customer_id = ? order by end_game_time limit 20";
-		try (Connection conn = MyConnect.getConnect()) {
-			PreparedStatement pstm = conn.prepareStatement(sql);
-			pstm.setInt(1, user.getCustomerId());
-			ResultSet rs = pstm.executeQuery();
+		// 객체에 아이디 저장
+		pstm.setString(1, playerId);
 
-			while (rs.next()) {
-				r.setRecordId(rs.getInt("record_id"));
-				r.setCustomerId(rs.getInt("customer_id"));
-				r.setGameresult(rs.getString("gameresult"));
-				r.setBet(rs.getInt("bet"));
-				r.setTotalHit(rs.getInt("total_hit"));
-				r.setTotalStay(rs.getInt("total_stay"));
-				r.setEnd_game_time(rs.getTimestamp("end_game_time").toLocalDateTime());
-				recordList.add(r);
-			}
-			for (Record ru : recordList) {
-				bw.write(recordList + "정보1");
-				bw.flush();
-			}
+		ResultSet rs = pstm.executeQuery();
+		if (rs.next()) {
+			return rs.getLong("money");
 		}
+		
+		return -1;
 	}
-	*/
-	// 자산 테이블을 조회하여 자산을 반환하는 메소드 구현해야 함
-	
-	// 자산을 업데이트해주는 메소드 구현해야 함
 	
 	
+	// 베팅 
+	public void updateMoney(long money) throws SQLException, IOException, ClassNotFoundException {
+		String updateSql = "update customer_info set money += ? where user_id = ?";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(updateSql);
+
+		// 객체에 아이디 저장
+		pstm.setLong(1, money);
+		pstm.setString(2, userId);
+
+		pstm.executeQuery();
+
+	}
+
+
 
 }
