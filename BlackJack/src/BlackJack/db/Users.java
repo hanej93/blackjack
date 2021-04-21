@@ -21,6 +21,10 @@ public class Users {
 	private BufferedReader br;
 	private BufferedWriter bw;
 
+	public Users() {
+		
+	}
+	
 	public Users(BufferedReader br, BufferedWriter bw) {
 		this.br = br;
 		this.bw = bw;
@@ -83,7 +87,7 @@ public class Users {
 		bw.write("회원가입을 위해 정보를 입력해 주세요\n");
 		bw.newLine();
 		bw.newLine();
-
+		
 		bw.write("아이디를 입력하세요 : \n");
 		bw.flush();
 		// 객체에 아이디 저장
@@ -144,7 +148,7 @@ public class Users {
 
 	}
 
-	// 사용자 정보 수정 (미구현)
+	// 사용자 정보 수정 (미구현) - 로그인한 본인만 수정가능!
 	public void userInformationUpdate() throws SQLException, IOException, ClassNotFoundException {
 		String updateSql = "update customer_info set(?) where user_id = ?";
 		Connection conn = MyConnect.getConnect();
@@ -164,6 +168,8 @@ public class Users {
 	}
 
 	
+	
+	/*
 	// 버그 수정 필요, 테스트 검증 필요(미구현)
 	public void userRecord() throws SQLException, IOException, ClassNotFoundException {
 		UsersImpl u1 = new UsersImpl();
@@ -195,7 +201,7 @@ public class Users {
 			}
 		}
 	}
-	
+	*/
 	// 자산 테이블을 조회하여 자산을 반환하는 메소드 구현해야 함
 	
 	// 자산을 업데이트해주는 메소드 구현해야 함

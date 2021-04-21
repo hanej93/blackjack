@@ -11,7 +11,7 @@ public class MyConnect {
 
 		String userId = "root";
 		String password = "mysql";
-		String url = "jdbc:mysql://localhost:3306/blackjack?" + "characterEncoding=utf-8&serverTimezone=Asia/Seoul";
+		String url = "jdbc:mysql://localhost:3306/blackjack_b?" + "characterEncoding=utf-8&serverTimezone=Asia/Seoul";
 
 		return DriverManager.getConnection(url, userId, password);
 	}
