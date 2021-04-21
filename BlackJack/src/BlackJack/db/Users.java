@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -270,23 +271,57 @@ public class Users {
 		ResultSet rs = pstm.executeQuery();
 		while (rs.next()) {
 			int recordId = rs.getInt("record_id");
-			int customerId = rs.getInt("customer_id");
+//			int customerId = rs.getInt("customer_id");
 			String gameResult = rs.getString("game_result");
 			long bet = rs.getLong("bet");
 			int totalHit = rs.getInt("total_hit");
 			int totalStay = rs.getInt("total_stay");
 			LocalDateTime endGameTime = rs.getTimestamp("end_game_time").toLocalDateTime();
-			LocalDateTime accessTime = rs.getTimestamp("access_game_time").toLocalDateTime();
-			LocalDateTime exitTime = rs.getTimestamp("exit_game_time").toLocalDateTime();
+//			LocalDateTime accessTime = rs.getTimestamp("access_game_time").toLocalDateTime();
+//			LocalDateTime exitTime = rs.getTimestamp("exit_game_time").toLocalDateTime();
 
 			String result = "[전적 테이블 조회]\n" + "[" + recordId + "]" + "고객 아이디 : " + customerId + ", " + "게임 결과 : "
 					+ gameResult + ", " + "게임 내 배팅 금액 : " + bet + ", " + "게임 내 hit한 수 : " + totalHit + ", "
-					+ "게임 내 stay한 수 : " + totalStay + ", " + "게임 끝난 시간 : " + endGameTime + ", " + "접속 시간 : "
-					+ accessTime + ", " + "접속 종료 시간 : " + exitTime;
+					+ "게임 내 stay한 수 : " + totalStay + ", " + "게임 끝난 시간 : " + endGameTime;
 
 			bw.write(result + "\n");
 			bw.flush();
 		}
+	}
+
+	// 랭킹 조회
+	public void selectRank(String inputUserId) throws ClassNotFoundException, SQLException, IOException {
+		String rankSelectSql = "select user_id, money, rankf from customer_info where user_id = ? order by money desc limit 10";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(rankSelectSql);
+
+		pstm.setString(1, inputUserId);
+
+		ResultSet rs = pstm.executeQuery();
+		while (rs.next()) {
+			userId = rs.getString("user_id");
+			money = rs.getLong("money");
+			rankf = rs.getString("rankf");
+			String result = "[랭크 테이블 조회]\n" + "아이디 : " + "[" + userId + "]\n" + "보유 자산 : " + "[" + money + "]\n"
+					+ "랭크 : " + "[" + rankf + "]";
+
+			bw.write(result + "\n");
+			bw.flush();
+		}
+	}
+
+	public void accessTimeSet(String userId, LocalDateTime accessTime, LocalDateTime exitTime)
+			throws ClassNotFoundException, SQLException, IOException {
+		String sql = "insert into history_table(user_id, access_date, exit_date)values(?, ?, ?)";
+		Connection conn = MyConnect.getConnect();
+		PreparedStatement pstm = conn.prepareStatement(sql);
+
+		// 객체에 아이디 저장
+		pstm.setString(1, userId);
+		pstm.setTimestamp(2, Timestamp.valueOf(accessTime));
+		pstm.setTimestamp(3, Timestamp.valueOf(exitTime));
+
+		pstm.executeQuery();
 	}
 
 }

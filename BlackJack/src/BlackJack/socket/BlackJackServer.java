@@ -139,7 +139,8 @@ public class BlackJackServer {
 
 				}
 
-				// 요기에 접속 시작 날짜 업데이트 해줘야함!!
+				// 게임  시작 날짜
+				accessTime = LocalDateTime.now();
 
 				while (true) {
 					bw.newLine();
@@ -295,7 +296,10 @@ public class BlackJackServer {
 							bw.write(Long.toString(moneyCheck.playerMoney(playerId)));
 							bw.newLine();
 							bw.flush();
+							
+							
 							// 전적테이블 업데이트(플레이종료시간, 승패)
+							gameResult = "Win";
 							
 						} else if (!player.isBust() && dealer.isBust()) {
 							bw.write("플레이어 승리");
@@ -304,7 +308,11 @@ public class BlackJackServer {
 							bw.write("플레이어 보유 자산: " + Long.toString(moneyCheck.playerMoney(playerId)));
 							bw.newLine();
 							bw.flush();
+							
+							
 							// 전적테이블 업데이트(플레이종료시간, 승패)
+							gameResult = "Win";
+							
 							
 						} else if (!player.isBust() && player.sumHand() == dealer.sumHand()) {
 							bw.write("무승부");
@@ -313,18 +321,26 @@ public class BlackJackServer {
 							bw.newLine();
 							bw.flush();
 							
+							gameResult = "Draw";
+							
 						} else if(player.isBust() && dealer.isBust()) {
 							bw.write("무승부");
 							moneyCheck.updateMoney(bettingMoney);
 							bw.write("플레이어 보유 자산: " + Long.toString(moneyCheck.playerMoney(playerId)));
 							bw.newLine();
 							bw.flush();
+							
+							gameResult = "Draw";
+							
+							
 						}
 						else {
 							bw.write("딜러 승리");
 							bw.write("플레이어 보유 자산 : " + Long.toString(moneyCheck.playerMoney(playerId)));
 							bw.newLine();
 							bw.flush();
+							
+							gameResult = "Defeat";
 							
 						}
 						bw.flush();
@@ -368,16 +384,20 @@ public class BlackJackServer {
 						continue;
 
 					} else if (choiceNum.equals("5")) {
+						Users user = new Users(br,bw);
+                        // 랭킹조회 메소드 구현
+                        user.selectRank(playerId);
+                        continue;
 
-						// 랭킹조회 메소드 구현
-
-						continue;
 					} else if (choiceNum.equals("6")) {
 
 						bw.write("블랙잭을 종료합니다!\n");
 						bw.flush();
-						// 게임 종료시간 업데이트해줘야함!
-
+						
+						exitTime = LocalDateTime.now();
+						Users user = new Users();
+                        user.accessTimeSet(playerId,accessTime, exitTime);
+						
 						break;
 
 					} else {
