@@ -217,12 +217,24 @@ public class BlackJackServer {
 						bw.flush();
 
 						while (true) {
+
 							bw.write("배팅할 금액을 입력해주세요!\n");
 							bw.flush();
-							oneGameBet = Long.parseLong(br.readLine());
+							try {
+								oneGameBet = Long.parseLong(br.readLine());
+							} catch (Exception e) {
+								// TODO: handle exception
+								bw.write("유효한 숫자를 입력 바랍니다.\n");
+								bw.newLine();
+								bw.newLine();
+								bw.flush();
+								continue;
+							}
 							if (oneGameBet > userOldAsset) {
 								bw.write("보유한 자산보다 배팅금액이 많습니다.\n");
 								bw.write("다시 입력바랍니다.\n");
+								bw.newLine();
+								bw.newLine();
 								bw.flush();
 								continue;
 							}
@@ -348,7 +360,6 @@ public class BlackJackServer {
 							twoCardBlackJack = 0.5;
 						}
 
-						
 						String yesOrNo = "n";
 						// [일반 게임](더블 다운 체크)
 						while (true) {
@@ -442,7 +453,7 @@ public class BlackJackServer {
 							bw.write("		BUST		\n");
 							bw.write("✧/ᐠ-ꞈ-ᐟ\\✧/ᐠ-ꞈ-ᐟ\\✧/ᐠ-ꞈ-ᐟ\\✧/ᐠ-ꞈ-ᐟ\\✧/ᐠ-ꞈ-ᐟ\\✧\n ");
 						}
-						
+
 						bw.newLine();
 						bw.newLine();
 						bw.newLine();
@@ -649,69 +660,71 @@ public class BlackJackServer {
 						continue;
 
 						// 6. 전적 집계
-					}else if (choiceNum.equals("6")) {
-							bw.newLine();
-							bw.newLine();
-							bw.write("전적 집계를 선택하셨습니다.\n");
-							bw.newLine();
-							bw.write("1. ID로 집계하기\n");
-							bw.write("2. 전체로 집계하기\n");
-							bw.flush();
-							String totChoiceNum = br.readLine();
-							Users user = new Users(br, bw);
-							String searchId = null;
-							DecimalFormat form = new DecimalFormat("#.##");
-							
-							if(totChoiceNum.equals("1")) {
-								searchId = user.recordIdSet();
-								int winCount = user.winCount(searchId);// 승리 횟수
-								int loseCount = user.loseCount(searchId);// 패배 횟수
-								String winOdds =  form.format(user.winOdds(searchId));// 승률
-								String betTotAvg = form.format(user.betTotAvg(searchId));// 배팅금액 평균
-								String hitTotAvg = form.format(user.hitTotAvg(searchId));// 한판 당 평균 hit 횟수
-								String stayTotAvg = form.format(user.stayTotAvg(searchId));// 한판 당 평균 stay 횟수
-								String result = "" + "┌───────────────────────────────────┐" + "\n   [전적 집계]              \n"
-										+ " 총 승리 횟수 : " + winCount + "       \n" + " 총 패배 횟수 : " + loseCount + "       \n"
-										+ " 승률 : " + winOdds + "       \n" + " 배팅금액 평균 : " + betTotAvg + "       \n"
-										+ " 게임 당 평균 hit 횟수 : " + hitTotAvg + "       \n" + " 게임 당 평균 stay 횟수 : " + stayTotAvg
-										+ "       \n" + "└───────────────────────────────────┚";
+					} else if (choiceNum.equals("6")) {
+						bw.newLine();
+						bw.newLine();
+						bw.write("전적 집계를 선택하셨습니다.\n");
+						bw.newLine();
+						bw.write("1. ID로 집계하기\n");
+						bw.write("2. 전체로 집계하기\n");
+						bw.flush();
+						String totChoiceNum = br.readLine();
+						Users user = new Users(br, bw);
+						String searchId = null;
+						DecimalFormat form = new DecimalFormat("#.##");
 
-								bw.write(result + "\n");
-								bw.flush();
-							}else if(totChoiceNum.equals("2")) {
-								int winCount = user.winCount(searchId);// 승리 횟수
-								int loseCount = user.loseCount(searchId);// 패배 횟수
-								String winOdds = form.format(user.winCount(searchId) / (user.winCount(searchId) + user.loseCount(searchId)));// 승률
-								String betTotAvg = form.format(user.betTotAvg(searchId));// 배팅금액 평균
-								String hitTotAvg = form.format(user.hitTotAvg(searchId));// 한판 당 평균 hit 횟수
-								String stayTotAvg = form.format(user.stayTotAvg(searchId));// 한판 당 평균 stay 횟수
-								String result = "" + "┌───────────────────────────────────┐" + "\n   [전적 집계]              \n"
-										+ " 총 승리 횟수 : " + winCount + "       \n" + " 총 패배 횟수 : " + loseCount + "       \n"
-										+ " 승률 : " + winOdds + "       \n" + " 배팅금액 평균 : " + betTotAvg + "       \n"
-										+ " 게임 당 평균 hit 횟수 : " + hitTotAvg + "       \n" + " 게임 당 평균 stay 횟수 : " + stayTotAvg
-										+ "       \n" + "└───────────────────────────────────┚";
+						if (totChoiceNum.equals("1")) {
+							searchId = user.recordIdSet();
+							int winCount = user.winCount(searchId);// 승리 횟수
+							int loseCount = user.loseCount(searchId);// 패배 횟수
+							String winOdds = form.format(user.winOdds(searchId) * 100);// 승률
+							String betTotAvg = form.format(user.betTotAvg(searchId));// 배팅금액 평균
+							String hitTotAvg = form.format(user.hitTotAvg(searchId));// 한판 당 평균 hit 횟수
+							String stayTotAvg = form.format(user.stayTotAvg(searchId));// 한판 당 평균 stay 횟수
+							String result = "" + "┌───────────────────────────────────┐"
+									+ "\n   [전적 집계]              \n" + " 총 승리 횟수 : " + winCount + "       \n"
+									+ " 총 패배 횟수 : " + loseCount + "       \n" + " 승률 : " + winOdds + "       \n"
+									+ " 배팅금액 평균 : " + betTotAvg + "       \n" + " 게임 당 평균 hit 횟수 : " + hitTotAvg
+									+ "       \n" + " 게임 당 평균 stay 횟수 : " + stayTotAvg + "       \n"
+									+ "└───────────────────────────────────┚";
 
-								bw.write(result + "\n");
-								bw.flush();
-							}else {
-								bw.write("잘못 입력하셨습니다. 다시 입력해주세요.\n");
-								bw.flush();
-								continue;
-							}
-							bw.newLine();
-							bw.newLine();
-							bw.newLine();
-							bw.write("메뉴로 이동하시겠습니까? Enter를 입력해주세요.\n");
-							bw.newLine();
-							bw.newLine();
-							bw.newLine();
+							bw.write(result + "\n");
 							bw.flush();
-							br.readLine();
+						} else if (totChoiceNum.equals("2")) {
+							int winCount = user.winCount(searchId);// 승리 횟수
+							int loseCount = user.loseCount(searchId);// 패배 횟수
+							String winOdds = form.format(user.winOdds(searchId) * 100);// 승률
+							String betTotAvg = form.format(user.betTotAvg(searchId));// 배팅금액 평균
+							String hitTotAvg = form.format(user.hitTotAvg(searchId));// 한판 당 평균 hit 횟수
+							String stayTotAvg = form.format(user.stayTotAvg(searchId));// 한판 당 평균 stay 횟수
+							String result = "" + "┌───────────────────────────────────┐"
+									+ "\n   [전적 집계]              \n" + " 총 승리 횟수 : " + winCount + "       \n"
+									+ " 총 패배 횟수 : " + loseCount + "       \n" + " 승률 : " + winOdds + "       \n"
+									+ " 배팅금액 평균 : " + betTotAvg + "       \n" + " 게임 당 평균 hit 횟수 : " + hitTotAvg
+									+ "       \n" + " 게임 당 평균 stay 횟수 : " + stayTotAvg + "       \n"
+									+ "└───────────────────────────────────┚";
+
+							bw.write(result + "\n");
+							bw.flush();
+						} else {
+							bw.write("잘못 입력하셨습니다. 다시 입력해주세요.\n");
+							bw.flush();
 							continue;
+						}
+						bw.newLine();
+						bw.newLine();
+						bw.newLine();
+						bw.write("메뉴로 이동하시겠습니까? Enter를 입력해주세요.\n");
+						bw.newLine();
+						bw.newLine();
+						bw.newLine();
+						bw.flush();
+						br.readLine();
+						continue;
 
-							// 7. 게임 종료
-							// 종료시 접속기록 인설트
-						} else if (choiceNum.equals("7")) {
+						// 7. 게임 종료
+						// 종료시 접속기록 인설트
+					} else if (choiceNum.equals("7")) {
 
 						bw.write("블랙잭을 종료합니다!\n");
 						bw.flush();
@@ -720,7 +733,7 @@ public class BlackJackServer {
 						exitTime = LocalDateTime.now();
 						Users user = new Users();
 						user.historySet(playerId, accessTime, exitTime);// history테이블 저장 완료
-						
+
 						bw.write("승연 명주님 수고하셨습니다!!\n");
 						bw.flush();
 						break;
