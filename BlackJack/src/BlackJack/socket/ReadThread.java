@@ -16,7 +16,11 @@ public class ReadThread extends Thread {
 	public void run() {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"))) {
 			while (true) {
-				System.out.println(br.readLine());
+				String str = br.readLine();
+				if(str.equals("승연 명주님 수고하셨습니다!!")) {
+					break;
+				}
+				System.out.println(str);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

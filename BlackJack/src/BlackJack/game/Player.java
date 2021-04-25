@@ -99,5 +99,14 @@ public class Player {
 			return false;
 		}
 	}
+	
+	public boolean isTwoCardBlackJack() {
+		if(playerHand.size() == 2 && this.sumHand() == 21) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
 
 }

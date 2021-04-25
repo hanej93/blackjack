@@ -7,15 +7,20 @@ import java.net.UnknownHostException;
 public class Client {
 	public static void main(String[] args) {
 		try(Socket socket = new Socket("127.0.0.1",8888)){
-			//write 스레드
-			Thread wt = new Thread((new WriteThread(socket)));
-			wt.start();
+			
 			//read 스레드
 			Thread rt = new Thread((new ReadThread(socket)));
+			rt.setDaemon(true);
 			rt.start();
 			
-			System.out.println("### 서버 접속 ####");
-			wt.join();
+			//write 스레드
+			Thread wt = new Thread((new WriteThread(socket)));
+			wt.setDaemon(true);
+			wt.start();
+			
+			
+			System.out.println("==== 서버 접속 ====");
+			rt.join();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
